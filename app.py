@@ -50,7 +50,7 @@ def ask():
 
     try:
         response = client.chat.completions.create(
-            model="openrouter/meta-llama/llama-3-8b-instruct",
+            model="google/gemma-7b-it",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_input}
