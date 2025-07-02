@@ -15,7 +15,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat_sessions.db'
 db = SQLAlchemy(app)
 
 # OpenAI API Key
-openai.api_key = os.getenv("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")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Chat model
 class ChatSession(db.Model):
