@@ -2,4 +2,4 @@ flask
 openai
 python-dotenv
 flask_sqlalchemy
-gunicorn
+gunicorn==21.2.0
