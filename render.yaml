@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: gynobot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    postDeployCommand: python app.py --init-db
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false  # set this in Render dashboard
