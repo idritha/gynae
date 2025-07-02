@@ -15,7 +15,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat_sessions.db'
 db = SQLAlchemy(app)
 
 # OpenAI API Key
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENROUTER_API_KEY")
+openai.api_base = "https://openrouter.ai/api/v1"
+
 
 # Chat model
 class ChatSession(db.Model):
@@ -47,7 +49,7 @@ def ask():
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="openrouter/meta-llama/llama-3-8b-instruct",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_input}
