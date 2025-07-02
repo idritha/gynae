@@ -63,8 +63,10 @@ def ask():
         db.session.commit()
 
         return jsonify({"reply": answer})
+
     except Exception as e:
-        return jsonify({"reply": "Sorry, an error occurred."})
+        print(f"❌ ERROR: {e}")  # logs real error to terminal
+        return jsonify({"reply": "❌ Error: " + str(e)}), 500
 
 if __name__ == "__main__":
     with app.app_context():
