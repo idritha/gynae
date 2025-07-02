@@ -50,7 +50,7 @@ def ask():
 
     try:
         response = client.chat.completions.create(
-            model="nousresearch/nous-capybara-7b",
+            model="gryphe/mythomax-l2-13b",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_input}
