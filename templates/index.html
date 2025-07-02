@@ -5,12 +5,25 @@
   <meta charset="UTF-8" />
   <title>Ask GynoBot</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="/static/manifest.json" />
+<link rel="icon" href="/static/icon-192.png" />
+<meta name="theme-color" content="#ec4899" />
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/static/service-worker.js');
+  }
+</script>
 </head>
 <body class="bg-pink-50 text-gray-800">
   <div class="max-w-xl mx-auto mt-10 p-4 bg-white shadow-lg rounded-2xl">
     <h1 class="text-2xl font-bold mb-4 text-center">Ask a Women's Health Question</h1>
     
     <div id="chat-box" class="h-64 overflow-y-auto border p-3 mb-4 rounded bg-gray-100"></div>
+    <select id="language-select" class="mb-3 w-full bg-gray-700 text-white rounded p-2">
+      <option value="en-US">🇬🇧 English</option>
+      <option value="ha">🇳🇬 Hausa</option>
+      <option value="ar">🇸🇦 Arabic</option>
+    </select>
 
     <div class="flex">
       <input id="message-input" class="flex-1 border p-2 rounded-l" placeholder="Type your question..." />
@@ -50,27 +63,28 @@
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function startDictation() {
-      if ('webkitSpeechRecognition' in window) {
-        const recognition = new webkitSpeechRecognition();
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
+   function startDictation() {
+  const lang = document.getElementById("language-select").value;
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.lang = lang;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
 
-        recognition.onresult = function (event) {
-          const transcript = event.results[0][0].transcript;
-          document.getElementById("message-input").value = transcript;
-        };
+    recognition.onresult = function (event) {
+      document.getElementById("message-input").value = event.results[0][0].transcript;
+    };
 
-        recognition.onerror = function (event) {
-          alert("Speech recognition error: " + event.error);
-        };
+    recognition.onerror = function (event) {
+      alert("Speech recognition error: " + event.error);
+    };
 
-        recognition.start();
-      } else {
-        alert("Your browser does not support voice input.");
-      }
-    }
+    recognition.start();
+  } else {
+    alert("Your browser does not support voice input.");
+  }
+}
+
   </script>
 </body>
 </html>
