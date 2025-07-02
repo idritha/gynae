@@ -1,23 +1,24 @@
-
 from flask import Flask, render_template, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import uuid
-import openai
 import os
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
+
 app = Flask(__name__)
 
 # Configure database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat_sessions.db'
 db = SQLAlchemy(app)
 
-# OpenAI API Key
-openai.api_key = os.getenv("OPENROUTER_API_KEY")
-openai.api_base = "https://openrouter.ai/api/v1"
-
+# OpenRouter API via OpenAI client
+client = OpenAI(
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+    base_url="https://openrouter.ai/api/v1"
+)
 
 # Chat model
 class ChatSession(db.Model):
@@ -48,7 +49,7 @@ def ask():
     session_id = request.cookies.get('session_id') or str(uuid.uuid4())
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="openrouter/meta-llama/llama-3-8b-instruct",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
@@ -57,16 +58,15 @@ def ask():
         )
         answer = response.choices[0].message.content.strip()
 
-        # Save to DB
+        # Save chat
         new_entry = ChatSession(session_id=session_id, user_msg=user_input, ai_reply=answer)
         db.session.add(new_entry)
         db.session.commit()
 
         return jsonify({"reply": answer})
-
     except Exception as e:
-        print(f"❌ ERROR: {e}")  # logs real error to terminal
-        return jsonify({"reply": "❌ Error: " + str(e)}), 500
+        print("❌", e)
+        return jsonify({"reply": f"❌ Error: {str(e)}"}), 500
 
 if __name__ == "__main__":
     with app.app_context():

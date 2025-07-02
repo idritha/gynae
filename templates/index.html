@@ -1,90 +1,132 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Ask GynoBot</title>
+  <title>GynoBot – Women’s Health AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="manifest" href="/static/manifest.json" />
-<link rel="icon" href="/static/icon-192.png" />
-<meta name="theme-color" content="#ec4899" />
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/static/service-worker.js');
-  }
-</script>
+  <style>
+    @keyframes dots {
+      0%, 20% { content: ""; }
+      40% { content: "."; }
+      60% { content: ".."; }
+      80%, 100% { content: "..."; }
+    }
+    .typing::after {
+      content: "";
+      animation: dots 1.5s steps(1, end) infinite;
+    }
+  </style>
 </head>
-<body class="bg-pink-50 text-gray-800">
-  <div class="max-w-xl mx-auto mt-10 p-4 bg-white shadow-lg rounded-2xl">
-    <h1 class="text-2xl font-bold mb-4 text-center">Ask a Women's Health Question</h1>
-    
-    <div id="chat-box" class="h-64 overflow-y-auto border p-3 mb-4 rounded bg-gray-100"></div>
-    <select id="language-select" class="mb-3 w-full bg-gray-700 text-white rounded p-2">
-      <option value="en-US">🇬🇧 English</option>
-      <option value="ha">🇳🇬 Hausa</option>
-      <option value="ar">🇸🇦 Arabic</option>
-    </select>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex items-center justify-center px-4">
 
-    <div class="flex">
-      <input id="message-input" class="flex-1 border p-2 rounded-l" placeholder="Type your question..." />
-      <button onclick="sendMessage()" class="bg-pink-600 text-white px-4 rounded-none">Send</button>
-      <button onclick="startDictation()" class="bg-gray-300 px-3 rounded-r">🎙</button>
+  <div class="w-full max-w-2xl h-[95vh] flex flex-col bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+    
+    <!-- Header -->
+    <div class="p-4 border-b border-gray-700 text-center">
+      <h1 class="text-2xl font-bold text-pink-400">GynoBot</h1>
+      <p class="text-sm text-gray-400">Confidential AI for women's health questions</p>
     </div>
 
-    <div class="mt-6">
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-XXXXXX"
-           data-ad-slot="YYYYYY"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <!-- Language Selector -->
+    <div class="p-3 bg-gray-900 border-b border-gray-700">
+      <select id="language-select" class="w-full bg-gray-700 text-white rounded px-3 py-2 text-sm">
+        <option value="en-US">🇬🇧 English</option>
+        <option value="ha">🇳🇬 Hausa</option>
+        <option value="ar">🇸🇦 Arabic</option>
+      </select>
+    </div>
+
+    <!-- Chat Window -->
+    <div id="chat-box" class="flex-1 overflow-y-auto bg-gray-900 p-4 space-y-4 text-sm">
+      <!-- Dynamic messages go here -->
+    </div>
+
+    <!-- Message Input -->
+    <div class="p-4 bg-gray-800 border-t border-gray-700 flex gap-2">
+      <input id="message-input"
+             type="text"
+             class="flex-1 bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring focus:ring-pink-400"
+             placeholder="Type your question..." />
+      <button onclick="sendMessage()" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg">
+        Send
+      </button>
+      <button onclick="startDictation()" class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-2 rounded-lg">
+        🎙
+      </button>
     </div>
   </div>
 
+  <!-- JavaScript -->
   <script>
     async function sendMessage() {
       const input = document.getElementById("message-input");
       const chatBox = document.getElementById("chat-box");
-      const userMsg = input.value;
+      const userMsg = input.value.trim();
       if (!userMsg) return;
 
-      chatBox.innerHTML += `<div><strong>You:</strong> ${userMsg}</div>`;
+      // Append user message
+      chatBox.innerHTML += `
+        <div class="flex justify-end">
+          <div class="bg-pink-600 text-white px-4 py-2 rounded-xl max-w-[75%]">${userMsg}</div>
+        </div>`;
       input.value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
 
-      const res = await fetch("/ask", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message: userMsg})
-      });
+      // Typing loader
+      const loadingId = `load-${Date.now()}`;
+      chatBox.innerHTML += `
+        <div id="${loadingId}" class="flex items-start gap-2">
+          <img src="/static/icon-192.png" class="w-8 h-8 rounded-full" alt="Bot Avatar" />
+          <div class="bg-gray-700 text-white px-4 py-2 rounded-xl max-w-[75%] typing">...</div>
+        </div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
 
-      const data = await res.json();
-      chatBox.innerHTML += `<div><strong>GynoBot:</strong> ${data.reply}</div>`;
+      // Fetch reply
+      try {
+        const res = await fetch("/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userMsg })
+        });
+
+        const data = await res.json();
+
+        const loader = document.getElementById(loadingId);
+        loader.innerHTML = `
+          <img src="/static/icon-192.png" class="w-8 h-8 rounded-full" alt="Bot Avatar" />
+          <div class="bg-gray-700 text-white px-4 py-2 rounded-xl max-w-[75%]">${data.reply}</div>`;
+      } catch (err) {
+        const loader = document.getElementById(loadingId);
+        loader.innerHTML = `
+          <img src="/static/icon-192.png" class="w-8 h-8 rounded-full" alt="Bot Avatar" />
+          <div class="bg-red-600 text-white px-4 py-2 rounded-xl max-w-[75%]">❌ ${err.message}</div>`;
+      }
+
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-   function startDictation() {
-  const lang = document.getElementById("language-select").value;
-  if ('webkitSpeechRecognition' in window) {
-    const recognition = new webkitSpeechRecognition();
-    recognition.lang = lang;
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+    function startDictation() {
+      const lang = document.getElementById("language-select").value;
+      if ('webkitSpeechRecognition' in window) {
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = lang;
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
 
-    recognition.onresult = function (event) {
-      document.getElementById("message-input").value = event.results[0][0].transcript;
-    };
+        recognition.onresult = function (event) {
+          document.getElementById("message-input").value = event.results[0][0].transcript;
+        };
 
-    recognition.onerror = function (event) {
-      alert("Speech recognition error: " + event.error);
-    };
+        recognition.onerror = function (event) {
+          alert("Speech recognition error: " + event.error);
+        };
 
-    recognition.start();
-  } else {
-    alert("Your browser does not support voice input.");
-  }
-}
-
+        recognition.start();
+      } else {
+        alert("Your browser does not support voice input.");
+      }
+    }
   </script>
 </body>
 </html>
