@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ask GynoBot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-pink-50 text-gray-800">
+  <div class="max-w-xl mx-auto mt-10 p-4 bg-white shadow-lg rounded-2xl">
+    <h1 class="text-2xl font-bold mb-4 text-center">Ask a Women's Health Question</h1>
+    
+    <div id="chat-box" class="h-64 overflow-y-auto border p-3 mb-4 rounded bg-gray-100"></div>
+
+    <div class="flex">
+      <input id="message-input" class="flex-1 border p-2 rounded-l" placeholder="Type your question..." />
+      <button onclick="sendMessage()" class="bg-pink-600 text-white px-4 rounded-none">Send</button>
+      <button onclick="startDictation()" class="bg-gray-300 px-3 rounded-r">🎙</button>
+    </div>
+
+    <div class="mt-6">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXX"
+           data-ad-slot="YYYYYY"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("message-input");
+      const chatBox = document.getElementById("chat-box");
+      const userMsg = input.value;
+      if (!userMsg) return;
+
+      chatBox.innerHTML += `<div><strong>You:</strong> ${userMsg}</div>`;
+      input.value = "";
+
+      const res = await fetch("/ask", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: userMsg})
+      });
+
+      const data = await res.json();
+      chatBox.innerHTML += `<div><strong>GynoBot:</strong> ${data.reply}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function startDictation() {
+      if ('webkitSpeechRecognition' in window) {
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onresult = function (event) {
+          const transcript = event.results[0][0].transcript;
+          document.getElementById("message-input").value = transcript;
+        };
+
+        recognition.onerror = function (event) {
+          alert("Speech recognition error: " + event.error);
+        };
+
+        recognition.start();
+      } else {
+        alert("Your browser does not support voice input.");
+      }
+    }
+  </script>
+</body>
+</html>
