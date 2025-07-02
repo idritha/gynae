@@ -1,5 +1,4 @@
 flask
 openai>=1.0.0
 python-dotenv
-flask_sqlalchemy
 gunicorn==21.2.0
