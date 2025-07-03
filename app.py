@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from langdetect import detect
 
+load_dotenv()
+app = Flask(__name__)
+
+# ✅ Supported languages
 SUPPORTED_LANGUAGES = {
     "en": "English",
     "ha": "Hausa",
@@ -15,18 +19,14 @@ SUPPORTED_LANGUAGES = {
     "ar": "Arabic"
 }
 
-
-load_dotenv()
-app = Flask(__name__)
-
-# OpenRouter config
+# ✅ OpenRouter client
 client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
     base_url="https://openrouter.ai/api/v1"
 )
 
-# System prompt for GynoBot
-SYSTEM_PROMPT = """
+# ✅ Base system personality
+BASE_PROMPT = """
 You are GynoBot — a warm, respectful, and supportive female gynecologist. 
 You're here to help women understand their health in a safe, non-judgmental space. 
 Use simple, caring language. Be gentle and conversational, like a trusted friend with medical knowledge.
@@ -37,9 +37,8 @@ If a user seems nervous, reassure them. If they mention symptoms, explain possib
 
 You understand and can respond in English, Hausa, Yoruba, Igbo, Fulani, and Arabic, depending on how the user asks.
 
-Always speak with empathy and a touch of sisterly kindness, and sometimes add some funny talks to make them happy.
+Always speak with empathy and a touch of sisterly kindness 💕, and feel free to use light humor to ease stress.
 """
-
 
 @app.route("/")
 def index():
@@ -54,18 +53,19 @@ def ask():
     user_input = request.json.get("message", "")
 
     try:
-
-        # Detect language
+        # 🌍 Detect language
         detected = detect(user_input)
-        lang_name = SUPPORTED_LANGUAGES.get(detected, "English")  # fallback
-        print(f"Detected language: {lang_name}")
+        lang_name = SUPPORTED_LANGUAGES.get(detected, "English")
+        print(f"🌐 Detected language: {lang_name} ({detected})")
 
-        # Dynamic system prompt
+        # 💬 Compose dynamic prompt
         dynamic_prompt = f"""
-You are GynoBot — a kind, respectful, and helpful gynecologist who responds in {lang_name}.
-Do not diagnose, just explain in simple terms.
-Respond in {lang_name} ONLY.
+{BASE_PROMPT}
+
+Please respond in {lang_name}. Use the language the user used to ask the question.
 """
+
+        # 🔁 Get AI response
         response = client.chat.completions.create(
             model="gryphe/mythomax-l2-13b",
             messages=[
