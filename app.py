@@ -62,12 +62,13 @@ def ask():
         dynamic_prompt = f"""
 {BASE_PROMPT}
 
-Please respond in {lang_name}. Use the language the user used to ask the question.
+You MUST reply in {lang_name}. Translate your response and answer ONLY in {lang_name}, not English.
+
 """
 
         # 🔁 Get AI response
         response = client.chat.completions.create(
-            model="gryphe/mythomax-l2-13b",
+            model="mistralai/mixtral-8x7b-instruct",
             messages=[
                 {"role": "system", "content": dynamic_prompt},
                 {"role": "user", "content": user_input}
