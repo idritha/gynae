@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GynoBot – Women’s Health AI</title>
+  <title>GynoGTP – Women’s Health AI</title>
   <link rel="manifest" href="/static/manifest.json">
   <link rel="apple-touch-icon" href="/static/icon-192.png">
   <meta name="theme-color" content="#d63384">
@@ -71,6 +71,13 @@
         </button>
       </div>
     </div>
+    <div class="p-3 bg-gray-900 text-center">
+  <a href="https://wa.me/?text=Hi%2C%20check%20out%20this%20confidential%20AI%20for%20women's%20health%20questions%20called%20GynoBot!%20Click%20here%3A%20https%3A%2F%2Fgynae.onrender.com"
+     target="_blank"
+     class="inline-block bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
+    💬 Share on WhatsApp
+  </a>
+</div>
 
   </div>
 
@@ -107,6 +114,7 @@
           <div class="bg-gray-700 px-4 py-2 rounded-lg max-w-[70%] typing">...</div>
         </div>`;
       chatBox.scrollTop = chatBox.scrollHeight;
+      updateChatStorage();
 
       // Fetch response
       try {
@@ -150,6 +158,19 @@
         alert("Your browser doesn't support voice input.");
       }
     }
+
+    // Load chat from localStorage on page load
+window.addEventListener("DOMContentLoaded", () => {
+  const savedChat = localStorage.getItem("gynae_chat");
+  if (savedChat) chatBox.innerHTML = savedChat;
+  chatBox.scrollTop = chatBox.scrollHeight;
+});
+
+// Save chat after each update
+function updateChatStorage() {
+  localStorage.setItem("gynae_chat", chatBox.innerHTML);
+}
+
   </script>
 </body>
 </html>
