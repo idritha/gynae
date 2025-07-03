@@ -4,6 +4,17 @@ import uuid
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from langdetect import detect
+
+SUPPORTED_LANGUAGES = {
+    "en": "English",
+    "ha": "Hausa",
+    "yo": "Yoruba",
+    "ig": "Igbo",
+    "ff": "Fulani",
+    "ar": "Arabic"
+}
+
 
 load_dotenv()
 app = Flask(__name__)
@@ -43,6 +54,18 @@ def ask():
     user_input = request.json.get("message", "")
 
     try:
+
+        # Detect language
+        detected = detect(user_input)
+        lang_name = SUPPORTED_LANGUAGES.get(detected, "English")  # fallback
+        print(f"Detected language: {lang_name}")
+
+        # Dynamic system prompt
+        dynamic_prompt = f"""
+You are GynoBot — a kind, respectful, and helpful gynecologist who responds in {lang_name}.
+Do not diagnose, just explain in simple terms.
+Respond in {lang_name} ONLY.
+"""
         response = client.chat.completions.create(
             model="gryphe/mythomax-l2-13b",
             messages=[
