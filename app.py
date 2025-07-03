@@ -69,7 +69,7 @@ Respond in {lang_name} ONLY.
         response = client.chat.completions.create(
             model="gryphe/mythomax-l2-13b",
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": dynamic_prompt},
                 {"role": "user", "content": user_input}
             ]
         )
